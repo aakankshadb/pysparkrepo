@@ -1,7 +1,12 @@
 from src.assignment1.utils import *
+# import logging
+# logging.basicConfig(filename="c:\\logs\\spark1.log", filemode="w")
+# log = logging.getLogger()
+# log.setLevel(logging.INFO)
 
 #calling a function to create a spark session object
 spark = create_sparkseesion()
+
 
 #calling a function to create a dataframe for product table
 product_df = product_dataframe(spark)
@@ -27,3 +32,46 @@ remove_brand_space_df.show(truncate=False)
 replace_null_df = replace_null(remove_brand_space_df)
 print("Product table with a new Country column where the null values are replaced")
 replace_null_df.show(truncate=False)
+
+#calling a function to create a dataframe for transaction table
+transaction_df=transaction_dataframe(spark)
+print("Transaction table")
+transaction_df.show(truncate=False)
+
+#calling a function to convert StartTime to millisecond in a newcolumn start_time_ms
+millisecond_df = millisecond(transaction_df)
+print("Transaction table with new start_time_ms column")
+millisecond_df.show(truncate=False)
+
+#calling a function to join both the tables.
+joined_df = joindataframe(replace_null_df,millisecond_df)
+print("Joined Tables")
+joined_df.select(F.col('ProductName'),
+                 F.col('Price'),
+                 F.col('Brand_new'),
+                 F.col('Product_Number'),
+                 F.col('Date'),
+                 F.col('Country_new'),
+                 F.col('SourceId'),
+                 F.col('TransactionNumber'),
+                 F.col('Language'),
+                 F.col('ModelNumber'),
+                 F.col('start_time_ms')
+                 ).show(truncate=False)
+
+#calling a function to filter the country with language as EN.
+filter_df = filter_country(joined_df)
+print("Filtered dataframe with country having language as EN")
+filter_df.select(F.col('ProductName'),
+                 F.col('Price'),
+                 F.col('Brand_new'),
+                 F.col('Product_Number'),
+                 F.col('Date'),
+                 F.col('Country_new'),
+                 F.col('SourceId'),
+                 F.col('TransactionNumber'),
+                 F.col('Language'),
+                 F.col('ModelNumber'),
+                 F.col('start_time_ms')
+                 )\
+    .show(truncate=False)
