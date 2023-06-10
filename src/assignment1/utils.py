@@ -49,34 +49,38 @@ def remove_space(df_date):
 def replace_null(df_remove_space):
     df_replace_null = df_remove_space.withColumn("Country_new",F.when(F.col("Country") == "null", '').otherwise(F.col("Country")))
     return df_replace_null
+
+#creating a function to create a dataframe for transaction table
+def transaction_dataframe(spark):
+    transaction_schema=StructType([StructField(name='SourceId',dataType=IntegerType()),
+                          StructField(name='TransactionNumber',dataType=IntegerType()),
+                          StructField(name='Language',dataType=StringType()),
+                          StructField(name='ModelNumber',dataType=IntegerType()),
+                          StructField(name='StartTime',dataType=StringType()),
+                          StructField(name='ProductNumber',dataType=IntegerType())
+                          ])
+    transaction_df = spark\
+            .read\
+            .format('csv')\
+            .options(header=True)\
+            .schema(transaction_schema)\
+            .load("../../resource/Product_transaction.csv")
+    return transaction_df
+
+#creating a function to add a new column as start_time_ms and convert the StartTime column values to milliseconds.
+def millisecond(transaction_df):
+    df_timestamp = transaction_df.withColumn("StartTime_timestamp",F.to_timestamp(F.col("StartTime")))
+    df_millisecond = df_timestamp.withColumn("start_time_ms",F.unix_timestamp(F.col("StartTime_timestamp")))
+    df_millisecond.printSchema()
+    return df_millisecond
+
+#creating a function to join both the dataframe
+def joindataframe(df_replace_null,df_millisecond):
+    joined_df = df_replace_null.join(df_millisecond,df_replace_null.Product_Number == df_millisecond.ProductNumber,"left")
+    return joined_df
+
+#creating a function to filter the country with language as EN
+def filter_country(joined_df):
+    df_filter = joined_df.filter(F.col("Language") == "EN")
+    return df_filter
 #
-# transaction_schema=StructType([StructField(name='SourceId',dataType=IntegerType()),
-#                           StructField(name='TransactionNumber',dataType=IntegerType()),
-#                           StructField(name='Language',dataType=StringType()),
-#                           StructField(name='ModelNumber',dataType=IntegerType()),
-#                           StructField(name='StartTime',dataType=StringType()),
-#                           StructField(name='ProductNumber',dataType=IntegerType())
-#                           ])
-# transaction_df = spark\
-#             .read\
-#             .format('csv')\
-#             .options(header=True)\
-#             .schema(transaction_schema)\
-#             .load("../../resource/Product_transaction.csv")
-#
-# miliisecond_df=transaction_df.withColumn("StartTime_timestamp",F.to_timestamp(F.col("StartTime")))
-# miliisecond_df1=miliisecond_df.withColumn("start_time_ms",F.unix_timestamp(F.col("StartTime_timestamp")))
-# miliisecond_df1.show(truncate=False)
-# joined_df=df_empty.join(miliisecond_df1, df_empty.Product_Number == miliisecond_df1.ProductNumber,"left")
-# joined_df.select(F.col('ProductName'),
-#                  F.col('Price'),
-#                  F.col('Brand_new'),
-#                  F.col('Product_Number'),
-#                  F.col('Date'),
-#                  F.col('Country1'),
-#                  F.col('SourceId'),
-#                  F.col('TransactionNumber'),
-#                  F.col('Language'),
-#                  F.col('ModelNumber'),
-#                  F.col('start_time_ms')
-#                  ).show(truncate=False)
