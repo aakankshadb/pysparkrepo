@@ -67,6 +67,8 @@ def transaction_dataframe(spark):
             .load("../../resource/Product_transaction.csv")
     return transaction_df
 
+#craeting a function to covert column names from camel case to snake case.
+
 #creating a function to add a new column as start_time_ms and convert the StartTime column values to milliseconds.
 def millisecond(transaction_df):
     df_timestamp = transaction_df.withColumn("StartTime_timestamp",F.to_timestamp(F.col("StartTime")))
