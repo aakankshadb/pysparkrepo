@@ -1,8 +1,5 @@
 from src.assignment1.utils import *
-# import logging
-# logging.basicConfig(filename="c:\\logs\\spark1.log", filemode="w")
-# log = logging.getLogger()
-# log.setLevel(logging.INFO)
+
 
 #calling a function to create a spark session object
 spark = create_sparkseesion()
@@ -24,12 +21,12 @@ print("Product table with issue date as datestamp  format")
 datestamp_df.show(truncate=False)
 
 #calling a function to remove the leading spaces in Brand column
-remove_brand_space_df = remove_space(datestamp_df)
+remove_brand_space_df = remove_space(product_df)
 print("Product table with a new Brand column that has no leading space")
 remove_brand_space_df.show(truncate=False)
 
 #calling a function to replace null values with empty spaces
-replace_null_df = replace_null(remove_brand_space_df)
+replace_null_df = replace_null(product_df)
 print("Product table with a new Country column where the null values are replaced")
 replace_null_df.show(truncate=False)
 
@@ -46,32 +43,10 @@ millisecond_df.show(truncate=False)
 #calling a function to join both the tables.
 joined_df = joindataframe(replace_null_df,millisecond_df)
 print("Joined Tables")
-joined_df.select(F.col('ProductName'),
-                 F.col('Price'),
-                 F.col('Brand_new'),
-                 F.col('Product_Number'),
-                 F.col('Date'),
-                 F.col('Country_new'),
-                 F.col('SourceId'),
-                 F.col('TransactionNumber'),
-                 F.col('Language'),
-                 F.col('ModelNumber'),
-                 F.col('start_time_ms')
-                 ).show(truncate=False)
+
+joined_df.show(truncate=False)
 
 #calling a function to filter the country with language as EN.
 filter_df = filter_country(joined_df)
 print("Filtered dataframe with country having language as EN")
-filter_df.select(F.col('ProductName'),
-                 F.col('Price'),
-                 F.col('Brand_new'),
-                 F.col('Product_Number'),
-                 F.col('Date'),
-                 F.col('Country_new'),
-                 F.col('SourceId'),
-                 F.col('TransactionNumber'),
-                 F.col('Language'),
-                 F.col('ModelNumber'),
-                 F.col('start_time_ms')
-                 )\
-    .show(truncate=False)
+filter_df.show(truncate=False)
